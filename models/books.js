@@ -27,12 +27,14 @@ module.exports = (sequelize, DataTypes) => {
     },
     first_published: DataTypes.INTEGER
   }, {
-    classMethods: {
-      associate: function(models) {
-        // associations can be defined here
-      }
-    },
+    underscored: true,
     timestamps: false
   });
+  
+  Books.associate = function(models) {
+    Books.hasMany(models.Loans, { foreignKey: 'book_id' });
+  }
+  
+  
   return Books;
 };

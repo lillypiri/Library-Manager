@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         // associations can be defined here
       }
     },
+    underscored: true,
     timestamps: false
   });
   return Loans;

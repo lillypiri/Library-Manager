@@ -1,21 +1,27 @@
 const express = require('express');
 const router = express.Router();
 
-const Books = require('../models').Books;
+const { Sequelize, Books, Loans } = require('../models');
 
 // Index - list all books
 router.get('/', (request, response) => {
+  let options = { order: [['first_published', 'desc']] };
 
 // //define a where object - 
 // console.log(request.query);
-// let where = {};
-// if(request.query.filter === 'overdue') {
-//   where.id = 4 
-// }
+if(request.query.filter === 'overdue') {
+  options.include = [{
+    model: Loans,
+    where: {
+      return_by: {
+        [Sequelize.Op.lt]: new Date()
+      },
+      returned_on: null
+    }
+  }]
+}
 
-// add ,where after 'desc']] below
-
-  Books.findAll({ order: [['first_published', 'desc']] }).then(books => {
+  Books.findAll(options).then(books => {
     response.render("books/index", { books, title: "All Books" });
   }).catch(err => {
     console.log(err);
