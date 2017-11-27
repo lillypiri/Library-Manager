@@ -1,0 +1,9 @@
+extends ../layout
+
+block main
+  h1= title
+  
+  include ../error
+  
+  form(action="/patrons/" + patrons.id + "?_method=PUT", method="post")
+    include form

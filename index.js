@@ -34,10 +34,6 @@ app.get('/new_patron', function(req, res) {
   res.render('new_patron', { title: "New patron" });
 });
 
-app.get('/new_book', function(req, res) {
-  res.render('new_book', { title: "New book" });
-});
-
 // Run the server
 app.listen(7777, () => {
   console.log("Listening on 7777");

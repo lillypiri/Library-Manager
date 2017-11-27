@@ -1,0 +1,13 @@
+extends ../layout
+
+block main
+	h1= patron.first_name + " " + patron.last_name
+	p= patron.address
+	p= patron.email
+	p= patron.zip_code
+	p= patron.library_id
+	a(href="../patrons") &larr; Back
+	| | 
+	a(href="/patrons/" + patron.id + "/edit") Edit Patron
+	| | 
+	a(href="/patrons/" + patron.id +  "/delete") Delete Patron

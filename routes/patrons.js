@@ -32,15 +32,118 @@ router.post('/', function(request, response, next) {
       }
     })
     .catch(function(err) {
+      console.log("HELLO OVER HERE", err)
       response.sendStatus(500);
     })
 })
 
-
-
 // patron form
 router.get('/new', function(request, response, next) {
   response.render("patrons/new", { patrons: Patrons.build(), title: "New patron" })
+})
+
+// edit patron form
+router.get('/:id/edit', function(request, response, next) {
+  Patrons.findById(request.params.id)
+    .then(function(patron) {
+      if (patron) {
+        response.render('patrons/edit', { patrons: patron, title: "Edit Patron Information" });
+      } else {
+        response.sendStatus(404);
+      }
+    })
+    .catch(function(err) {
+      response.sendStatus(500);
+    });
+});
+
+// delete patron form
+router.get("/:id/delete", function(request, response, next) {
+  Patrons.findById(request.params.id)
+  .then(function(patron) {
+    if (patron) {
+      // console.log('patron', patron);
+      response.render('patrons/delete', { patron: patron, title: "Delete Patron" });
+    } else {
+      response.sendStatus(404);
+    }
+  })
+  .catch(function(err) {
+    console.log("THING", err)
+    response.sendStatus(500);
+  })
+});
+
+//get an individual patron
+router.get("/:id", function(request, response, next) {
+  Patrons.findById(request.params.id)
+    .then(function(patron) {
+      if (patron) {
+        response.render('patrons/show', { patron: patron, title: patron.title });
+      } else {
+        response.sendStatus(404)
+      }
+    })
+    .catch(function(err) {
+      console.log("THING", err);
+      response.sendStatus(500);
+    });
+});
+
+
+// update patron
+router.put('/:id', function(request, response, next) {
+  Patrons.findById(request.params.id)
+  .then(function(patrons) {
+    if (patrons) {
+      return patrons.update(request.body);
+    } else {
+      response.send(404);
+    }
+  })
+  .then(function(patrons) {
+    response.redirect('/patrons/' + patrons.id)
+  })
+  .catch(function(err) {
+    if (err.name === 'SequelizeValidationError') {
+      const patron = Patron.build(request.body);
+      patrons.id = request.params.id;
+
+      response.render('patrons/edit', {
+        patrons: patrons,
+        title: "Edit Patron",
+        errors: err.errors
+      })
+    } else {
+      throw err;
+    }
+  })
+  .catch(function(err) {
+    response.sendStatus(500);
+  })
+})
+
+//delete individual patron
+router.delete('/:id', function(request, response, next) {
+  console.log("IN DELETE")
+  Patrons.findById(request.params.id)
+  .then(function(patron) {
+    if (patron) {
+      console.log("in patron")
+      return patron.destroy();
+    } else {
+      response.sendStatus(404);
+            console.log('SENDING A 404!!!!!!!!!!!!!!!!!!!!!!!!!!!!', patron);
+    }
+  })
+  .then(function() {
+    response.redirect('/patrons');
+  })
+  .catch(function(err) {
+          console.log('patron', patron);
+    console.log('THING', err);
+    response.sendStatus(500)
+  })
 })
 
 module.exports = router;
