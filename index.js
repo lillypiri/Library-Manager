@@ -18,21 +18,10 @@ app.get('/', function(req, res) {
   res.render('index', { title: 'Hey', message: 'Hello there!' });
 });
 
-app.get('/overdue_loans', function(req, res) {
-  res.render('overdue_loans', { title: 'Overdue Loans' });
-});
-
 app.get('/checked_loans', function(req, res) {
   res.render('checked_loans', { title: 'Checked out books' });
 });
 
-app.get('/new_loan', function(req, res) {
-  res.render('new_loan', { title: "New loan" });
-});
-
-app.get('/new_patron', function(req, res) {
-  res.render('new_patron', { title: "New patron" });
-});
 
 // Run the server
 app.listen(7777, () => {

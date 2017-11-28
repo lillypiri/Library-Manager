@@ -1,0 +1,9 @@
+extends ../layout
+
+block main
+  h1= title
+  
+  include ../error
+  
+  form(action="/loans/" + loans.id + "?_method=PUT", method="post")
+    include returnform
