@@ -35,12 +35,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     returned_on: DataTypes.DATE
   }, {
-    underscored: true,
     timestamps: false
   });
 
   Loans.associate = function(models) {
     Loans.belongsTo(models.Books, { foreignKey: 'book_id' });
+    Loans.belongsTo(models.Patrons, { foreignKey: 'patron_id' });
   }
       
   return Loans;

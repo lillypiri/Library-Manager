@@ -1,47 +1,52 @@
 const express = require('express');
 const router = express.Router();
+const format = require('date-fns/format');
 
-const { Sequelize, Loans, Books } = require('../models');
+function d(date) {
+  if (!date) return '';
+  
+  return format(date, 'YYYY-MM-DD');
+}
+
+const { Sequelize, Loans, Books, Patrons } = require('../models');
 
 // Index - list all loans
 router.get('/', (request, response) => {
-  let options = { order: [['return_by', 'desc']] };
+  let options = { 
+    order: [['return_by', 'desc']], 
+    include: [
+      { model: Books },
+      { model: Patrons }
+    ],
+    where: {}
+  };
 
   // //define a where object -
   // console.log(request.query);
   if (request.query.filter === 'overdue') {
     console.log('Inside filter');
-    options.include = [
-      {
-        model: Loans,
-        where: {
-          return_by: {
-            [Sequelize.Op.lt]: new Date()
-          },
-          returned_on: null
-        }
-      }
-    ];
+    options.where = {
+      return_by: {
+        [Sequelize.Op.lt]: new Date()
+      },
+      returned_on: null
+    };
+    
   } else if (request.query.filter === 'checked_out') {
     console.log('IS THIS THING ON');
-    options.include = [
-      {
-        model: Loans,
-        where: {
-          loaned_on: {
-            [Sequelize.Op.ne]: null
-          },
-          returned_on: {
-            [Sequelize.Op.eq]: null
-          }
-        }
+    options.where = {
+      loaned_on: {
+        [Sequelize.Op.ne]: null
+      },
+      returned_on: {
+        [Sequelize.Op.eq]: null
       }
-    ];
+    };
   }
 
-  Loans.findAll({ order: [['return_by', 'desc']] })
+  Loans.findAll(options)
     .then(loans => {
-      response.render('loans/index', { loans });
+      response.render('loans/index', { loans, d });
     })
     .catch(err => {
       console.log(err);
@@ -78,16 +83,16 @@ router.get('/new', function(request, response, next) {
 });
 
 // overdue loans
-router.get('/overdue', function(request, response, next) {
-  Loans.findAll({ order: [['return_by', 'desc']] })
-    .then(loans => {
-      response.render('loans/overdue', { loans });
-    })
-    .catch(err => {
-      console.log(err);
-      response.sendStatus(500);
-    });
-});
+// router.get('/overdue', function(request, response, next) {
+//   Loans.findAll({ order: [['return_by', 'desc']] })
+//     .then(loans => {
+//       response.render('loans/overdue', { loans });
+//     })
+//     .catch(err => {
+//       console.log(err);
+//       response.sendStatus(500);
+//     });
+// });
 
 // get an individual loan
 router.get('/:id', function(request, response, next) {
@@ -110,7 +115,7 @@ router.get('/:id/return', function(request, response, next) {
   Loans.findById(request.params.id)
     .then(function(loan) {
       if (loan) {
-        response.render('loans/return', { loans: loan, title: 'Return a loan' });
+        response.render('loans/return', { loans: loan, title: 'Return a loan', d });
       } else {
         response.sendStatus(404);
       }

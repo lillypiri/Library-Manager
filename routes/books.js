@@ -5,7 +5,10 @@ const { Sequelize, Books, Loans } = require('../models');
 
 // Index - list all books
 router.get('/', (request, response) => {
-  let options = { order: [['first_published', 'desc']] };
+  let options = { 
+    order: [['first_published', 'desc']],
+    where: {}
+  };
 
   // //define a where object -
   // console.log(request.query);
@@ -36,6 +39,12 @@ router.get('/', (request, response) => {
         }
       }
     ];
+  }
+  
+  if (request.query.q) {
+    options.where.title = {
+      [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
+    }
   }
 
   Books.findAll(options)

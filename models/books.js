@@ -27,7 +27,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     first_published: DataTypes.INTEGER
   }, {
-    underscored: true,
     timestamps: false
   });
   

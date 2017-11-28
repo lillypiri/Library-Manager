@@ -50,13 +50,12 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   }, {
-    classMethods: {
-      associate: function(models) {
-        // associations can be defined here
-      }
-    },
-    underscored: true,
     timestamps: false
   });
+  
+  Patrons.associate = function(models) {
+    Patrons.hasMany(models.Loans, { foreignKey: 'patron_id' });
+  }
+  
   return Patrons;
 };

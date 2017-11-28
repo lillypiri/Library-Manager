@@ -7,11 +7,11 @@ block main
 			a.button(href="/loans/new") Create New Loan
 		p
 			| Filters 
-			a(href="all_loans.html") All
+			a(href="/loans") All
 			|  | 
-			a(href="/loans/overdue") Overdue
+			a(href="/loans?filter=overdue") Overdue
 			|  | 
-			a(href="checked_loans.html") Checked Out
+			a(href="/loans?filter=checked_out") Checked Out
 		table
 			thead
 				tr
@@ -26,13 +26,14 @@ block main
 				each loan in loans
 					tr
 						td
-							a(href="/books/" + loan.book_id)= loan.book_id
+							a(href="/books/" + loan.book_id)= loan.Book.title
 						td
-							a(href="patron_detail.html")= loan.patron_id
-						td= loan.loaned_on
-						td= loan.return_by
-						td= loan.returned_on
+							a(href="/patrons/" + loan.patron_id)= loan.Patron.first_name
+						td=d(loan.loaned_on)
+						td=d(loan.return_by)
+						td=d(loan.returned_on)
 						td
-							a.button(href="/loans/" + loan.id + "/return") Return Book
+							if !loan.returned_on
+								a.button(href="/loans/" + loan.id + "/return") Return Book
 						td
 							a.button(href="/loans/" + loan.id +  "/delete") Delete Loan 
