@@ -1,0 +1,12 @@
+extends ../layout
+
+block main
+  h1= loan.title
+  p 
+    | Are you sure you want to delete 
+    em= loan.id
+    | ?
+  form(action="/loans/" + loan.id + "?_method=DELETE", method="post")
+    a(href="/loans/" + loan.id) No! Take me back!
+    | 
+    input(type="submit", value = "Yes, I am")

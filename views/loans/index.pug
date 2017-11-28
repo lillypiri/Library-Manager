@@ -25,11 +25,11 @@ block main
 				each loan in loans
 					tr
 						td
-							a(href="book_detail.html")= loan.book_id
+							a(href="/books/" + loan.book_id)= loan.book_id
 						td
 							a(href="patron_detail.html")= loan.patron_id
 						td= loan.loaned_on
 						td= loan.return_by
 						td= loan.returned_on
 						td
-							a.button(href="return_book.html") Return Book
+							a.button(href="/loans/" + loan.id +  "/delete") Return Book 
