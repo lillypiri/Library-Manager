@@ -49,6 +49,7 @@ router.get('/', (request, response) => {
   }
   
   //input name = q, form method is a get.
+  // Search the results by title, author or genre
   if (request.query.q) {
     options.where = {
       [Sequelize.Op.or]: [
@@ -59,6 +60,11 @@ router.get('/', (request, response) => {
         },
         { 
           author: {
+            [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
+          }
+        },
+        { 
+          genre: {
             [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
           }
         }
@@ -184,25 +190,25 @@ router.put('/:id', function(request, response, next) {
     });
 });
 
-
-router.get('/:page', (req, res) => {
-  let options = { order: [['title', 'asc']], where: {} };
-  let limit = 10; // number of records per page
-  let offset = 0;
-  Books.findAndCountAll()
-    .then(data => {
-      let page = req.params.page; // page number
-      let pages = Math.ceil(data.count / limit);
-      offset = limit * (page - 1);
-      Books.findAll(options)
-        .then(users => {
-          res.status(200).json({ result: books, count: data.count, pages: pages });
-        });
-    })
-    .catch(function(error) {
-      res.status(500).send('Internal Server Error');
-    });
-});
+// // pagination crap
+// router.get('/:page', (req, res) => {
+//   let options = { order: [['title', 'asc']], where: {} };
+//   let limit = 10; // number of records per page
+//   let offset = 0;
+//   Books.findAndCountAll()
+//     .then(data => {
+//       let page = req.params.page; // page number
+//       let pages = Math.ceil(data.count / limit);
+//       offset = limit * (page - 1);
+//       Books.findAll(options)
+//         .then(users => {
+//           res.status(200).json({ result: books, count: data.count, pages: pages });
+//         });
+//     })
+//     .catch(function(error) {
+//       res.status(500).send('Internal Server Error');
+//     });
+// });
 
 //delete individual book
 router.delete('/:id', function(request, response, next) {

@@ -5,6 +5,12 @@ block main
 		h1 Books
 		p
 			a.button(href="books/new") Create New Book
+		p  
+		form(action="/books/" + "?_method=GET", method="get")
+			div
+				label(for="query") Search by Title, Author, or Genre:
+				input(type="text", name="q")
+				input(type="submit" value="Search")
 		p
 			| Filters 
 			a(href="/books/") All
