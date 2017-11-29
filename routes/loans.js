@@ -77,37 +77,8 @@ router.post('/', function(request, response, next) {
     });
 });
 
-// loan form
-// router.get('/new', function(request, response, next) {
-//   response.render('loans/new', { loans: Loans.build(), title: 'New loan', d });
-// });
 
-// router.get('/new', function(request, response, next) {
-//   // Get a list of all books that are not already on loan
-//   Books.findAll({
-//     include: [
-//       {
-//         model: Loans,
-//         where: {
-//           loaned_on: {
-//             [Sequelize.Op.ne]: null
-//           },
-//           returned_on: {
-//             [Sequelize.Op.eq]: null
-//           }
-//         }
-//       }
-//     ]
-//   }).then(books => {
-//     // Get a list of all patrons
-//     Patrons.findAll().then(patrons => {
-//       // Render the new loan form
-//       response.render('loans/new', { title: 'New loan', newLoan: Loans.build(), books, patrons, d });
-//     });
-//   });
-// });
-
-// book form
+// new loan form
 router.get('/new', function(request, response) {
   console.log('hmmm');
 
@@ -134,7 +105,7 @@ router.get('/new', function(request, response) {
         .then(patrons => {
           console.log("then found the patrons")
           response.render('loans/new', { title: 'New loan', newLoan: Loans.build(), books, patrons, d });
-                    console.log('after the patrons');
+          console.log('after the patrons');
         })
         .catch(err => {
           console.log(err);

@@ -121,9 +121,15 @@ router.get('/:id/delete', function(request, response, next) {
 
 //get an individual book
 router.get('/:id', function(request, response, next) {
+    let options = { 
+    include: [
+      { model: Loans }
+    ]
+  };
   Books.findById(request.params.id)
     .then(function(book) {
       if (book) {
+        console.log('What is a loan', book.Loan);
         response.render('books/show', { book: book, title: book.title });
       } else {
         response.sendStatus(404);
@@ -164,6 +170,26 @@ router.put('/:id', function(request, response, next) {
     })
     .catch(function(err) {
       response.sendStatus(500);
+    });
+});
+
+
+router.get('/:page', (req, res) => {
+  let options = { order: [['title', 'asc']], where: {} };
+  let limit = 10; // number of records per page
+  let offset = 0;
+  Books.findAndCountAll()
+    .then(data => {
+      let page = req.params.page; // page number
+      let pages = Math.ceil(data.count / limit);
+      offset = limit * (page - 1);
+      Books.findAll(options)
+        .then(users => {
+          res.status(200).json({ result: books, count: data.count, pages: pages });
+        });
+    })
+    .catch(function(error) {
+      res.status(500).send('Internal Server Error');
     });
 });
 

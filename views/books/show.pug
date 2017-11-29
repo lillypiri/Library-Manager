@@ -24,11 +24,11 @@ block main
 		tbody
 				tr
 					td
-						a(href='book_detail.html') A Brief History of Time
+						a(href='book_detail.html')= book.title
 					td
 						a(href='patron_detail.html') Andrew Chalkley
-					td 2015-12-12
+					td= book.loaned_on
 					td 2015-12-19
 					td
 					td
-						a.button(href='return_book.html') Return Book
+						a.button(href="/loans/" + book.id + "/return") Return Book
