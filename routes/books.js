@@ -1,7 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const format = require('date-fns/format');
 
-const { Sequelize, Books, Loans } = require('../models');
+function d(date) {
+  if (!date) return '';
+  
+  return format(date, 'YYYY-MM-DD');
+}
+
+const { Sequelize, Books, Loans, Patrons } = require('../models');
 
 // Index - list all books
 router.get('/', (request, response) => {
@@ -120,25 +127,17 @@ router.get('/:id/delete', function(request, response, next) {
 });
 
 //get an individual book
-router.get('/:id', function(request, response, next) {
-    let options = { 
-    include: [
-      { model: Loans }
-    ]
-  };
-  Books.findById(request.params.id)
-    .then(function(book) {
-      if (book) {
-        console.log('What is a loan', book.Loan);
-        response.render('books/show', { book: book, title: book.title });
-      } else {
-        response.sendStatus(404);
-      }
-    })
-    .catch(function(err) {
-      console.log('THING', err);
-      response.sendStatus(500);
-    });
+router.get('/:id', async (request, response) => {
+  const [book, loans] = await Promise.all([
+    Books.findById(request.params.id),
+    Loans.findAll({ where: { book_id: request.params.id }, include: [{ model: Patrons }]})
+  ]);
+  
+  if (!book) {
+    return response.sendStatus(404);
+  }
+  
+  return response.render('books/show', { title: book.title, book, loans, d });
 });
 
 // update book

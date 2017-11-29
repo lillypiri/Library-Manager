@@ -1,9 +1,6 @@
-extends layout
-
-block main
-	if(errors)
-		h2.errors Ooops an error occured!
-		ul.errors
-			each error in errors
-				li
-					=error.message
+if(errors)
+	h2.errors Ooops an error occured!
+	ul.errors
+		each error in errors
+			li
+				=error.message

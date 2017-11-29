@@ -22,13 +22,14 @@ block main
 				th Returned on
 				th Action
 		tbody
+			each loan in loans
 				tr
 					td
 						a(href='book_detail.html')= book.title
 					td
-						a(href='patron_detail.html') Andrew Chalkley
-					td= book.loaned_on
-					td 2015-12-19
+						a(href='patron_detail.html')= loan.Patron.first_name + ' ' + loan.Patron.last_name
+					td= d(loan.loaned_on)
+					td= d(loan.return_by)
+					td= d(loan.returned_on)
 					td
-					td
-						a.button(href="/loans/" + book.id + "/return") Return Book
+						a.button(href="/loans/" + loan.id + "/return") Return Book

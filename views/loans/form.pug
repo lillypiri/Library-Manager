@@ -1,11 +1,11 @@
 div
 	label(for="book_id") Book:
-	select
+	select(name = "book_id")
 		each book in books
 			option(value=book.id)= book.title
 div 
 	label(for="patron_id") Patron:
-	select
+	select(name = "patron_id")
 		each patron in patrons
 			option(value=patron.id)= patron.first_name + " " + patron.last_name
 div

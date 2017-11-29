@@ -5,7 +5,7 @@ block main
   
   include ../error
   
-  form(action="/loans/" + loans.id + "?_method=PUT", method="post")
+  form(action="/loans/" + loan.id + "?_method=PUT", method="post")
     div
       label(for="returned_on") Returned on:
       input(type="text", name="returned_on" value=d(new Date()))

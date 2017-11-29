@@ -1,7 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const format = require('date-fns/format');
 
-const Patrons = require('../models').Patrons;
+function d(date) {
+  if (!date) return '';
+  
+  return format(date, 'YYYY-MM-DD');
+}
+
+const {Patrons, Sequelize, Books, Loans} = require('../models');
 
 // Index - list all patrons
 router.get('/', (request, response) => {
@@ -75,19 +82,16 @@ router.get("/:id/delete", function(request, response, next) {
 });
 
 //get an individual patron
-router.get("/:id", function(request, response, next) {
-  Patrons.findById(request.params.id)
-    .then(function(patron) {
-      if (patron) {
-        response.render('patrons/show', { patron: patron, title: patron.title });
-      } else {
-        response.sendStatus(404)
-      }
-    })
-    .catch(function(err) {
-      console.log("THING", err);
-      response.sendStatus(500);
-    });
+router.get("/:id", async (request, response) => {
+  const [patron, loans] = await Promise.all([
+    Patrons.findById(request.params.id),
+    Loans.findAll({ where: { patron_id: request.params.id }, include: [{ model: Books }]})
+  ]);
+  if (patron) {
+    response.render('patrons/show', { patron, loans, title: patron.title, d });
+  } else {
+    response.sendStatus(404)
+  }
 });
 
 
