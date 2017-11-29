@@ -48,9 +48,21 @@ router.get('/', (request, response) => {
     ];
   }
   
+  //input name = q, form method is a get.
   if (request.query.q) {
-    options.where.title = {
-      [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
+    options.where = {
+      [Sequelize.Op.or]: [
+        { 
+          title: {
+            [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
+          }
+        },
+        { 
+          author: {
+            [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
+          }
+        }
+      ]
     }
   }
 
