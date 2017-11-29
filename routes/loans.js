@@ -77,22 +77,73 @@ router.post('/', function(request, response, next) {
     });
 });
 
-// book form
-router.get('/new', function(request, response, next) {
-  response.render('loans/new', { loans: Loans.build(), title: 'New loan' });
-});
-
-// overdue loans
-// router.get('/overdue', function(request, response, next) {
-//   Loans.findAll({ order: [['return_by', 'desc']] })
-//     .then(loans => {
-//       response.render('loans/overdue', { loans });
-//     })
-//     .catch(err => {
-//       console.log(err);
-//       response.sendStatus(500);
-//     });
+// loan form
+// router.get('/new', function(request, response, next) {
+//   response.render('loans/new', { loans: Loans.build(), title: 'New loan', d });
 // });
+
+// router.get('/new', function(request, response, next) {
+//   // Get a list of all books that are not already on loan
+//   Books.findAll({
+//     include: [
+//       {
+//         model: Loans,
+//         where: {
+//           loaned_on: {
+//             [Sequelize.Op.ne]: null
+//           },
+//           returned_on: {
+//             [Sequelize.Op.eq]: null
+//           }
+//         }
+//       }
+//     ]
+//   }).then(books => {
+//     // Get a list of all patrons
+//     Patrons.findAll().then(patrons => {
+//       // Render the new loan form
+//       response.render('loans/new', { title: 'New loan', newLoan: Loans.build(), books, patrons, d });
+//     });
+//   });
+// });
+
+// book form
+router.get('/new', function(request, response) {
+  console.log('hmmm');
+
+  // Get a list of all books that are not already on loan
+  Books.findAll({
+    include: [
+      {
+        model: Loans,
+        where: {
+          loaned_on: {
+            [Sequelize.Op.ne]: null
+          },
+          returned_on: {
+            [Sequelize.Op.eq]: null
+          }
+        }
+      }
+    ]
+  })
+    .then(books => {
+      console.log('then books => found the books');
+      // Get a list of all patrons
+      Patrons.findAll()
+        .then(patrons => {
+          console.log("then found the patrons")
+          response.render('loans/new', { title: 'New loan', newLoan: Loans.build(), books, patrons, d });
+                    console.log('after the patrons');
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+});
 
 // get an individual loan
 router.get('/:id', function(request, response, next) {
@@ -126,7 +177,6 @@ router.get('/:id/return', function(request, response, next) {
     });
 });
 
-
 // update a loan
 router.put('/:id', function(request, response, next) {
   Loans.findById(request.params.id)
@@ -142,7 +192,9 @@ router.put('/:id', function(request, response, next) {
     })
     .catch(function(err) {
       if (err.name === 'SequelizeValidationError') {
-        const book = Book.build(request.body);
+        console.log("error is Sequelize")
+        const book = Books.build(request.body);
+        const loans = Loans.build(request.body);
         loans.id = request.params.id;
 
         response.render('loans/return', {
@@ -151,11 +203,12 @@ router.put('/:id', function(request, response, next) {
           errors: err.errors
         });
       } else {
+        console.log("about to throw err")
         throw err;
       }
     })
     .catch(function(err) {
-      console.log("hre's that 500")
+      console.log("update a loan", err)
       response.sendStatus(500);
     });
 });

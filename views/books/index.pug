@@ -7,11 +7,11 @@ block main
 			a.button(href="books/new") Create New Book
 		p
 			| Filters 
-			a(href="all_books.html") All
+			a(href="/books/") All
 			|  | 
-			a(href="overdue_books.html") Overdue
+			a(href="/books?filter=overdue") Overdue
 			|  | 
-			a(href="checked_books.html") Checked Out
+			a(href="/books?filter=checked_out") Checked Out
 		table
 			thead
 				tr

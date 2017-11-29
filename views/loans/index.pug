@@ -28,7 +28,7 @@ block main
 						td
 							a(href="/books/" + loan.book_id)= loan.Book.title
 						td
-							a(href="/patrons/" + loan.patron_id)= loan.Patron.first_name
+							a(href="/patrons/" + loan.patron_id)= loan.Patron.first_name + " " + loan.Patron.last_name
 						td=d(loan.loaned_on)
 						td=d(loan.return_by)
 						td=d(loan.returned_on)
