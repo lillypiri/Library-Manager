@@ -14,6 +14,8 @@ const { Sequelize, Books, Loans, Patrons } = require('../models');
 router.get('/', (request, response) => {
   let options = {
     order: [['title', 'asc']],
+    limit: 10,
+    offset: 0,
     where: {}
   };
   // console.log(request.query);
@@ -78,6 +80,19 @@ router.get('/', (request, response) => {
       console.log(err);
       response.sendStatus(500);
     });
+
+    Books.findAndCountAll(options)
+      .then(books => {
+        let bookCount = books.count;
+        let pageSize = 10;
+        let pages = Math.ceil(bookCount / pageSize);
+        console.log('Book count:', bookCount, "Page count:", pages);
+        // console.log('rows of stuff', result.rows);
+      })
+      .catch(err => {
+        console.log("Find and count all error", err);
+        response.sendStatus(500);
+      });
 });
 
 // Create a book
@@ -183,26 +198,6 @@ router.put('/:id', (request, response, next) => {
       response.sendStatus(500);
     });
 });
-
-// // pagination crap
-// router.get('/:page', (req, res) => {
-//   let options = { order: [['title', 'asc']], where: {} };
-//   let limit = 10; // number of records per page
-//   let offset = 0;
-//   Books.findAndCountAll()
-//     .then(data => {
-//       let page = req.params.page; // page number
-//       let pages = Math.ceil(data.count / limit);
-//       offset = limit * (page - 1);
-//       Books.findAll(options)
-//         .then(users => {
-//           res.status(200).json({ result: books, count: data.count, pages: pages });
-//         });
-//     })
-//     .catch(function(error) {
-//       res.status(500).send('Internal Server Error');
-//     });
-// });
 
 // Delete individual book
 router.delete('/:id', (request, response, next) => {
