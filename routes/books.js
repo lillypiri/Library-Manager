@@ -48,9 +48,8 @@ router.get('/', (request, response) => {
       }
     ];
   } else if (request.query.page) {
-    console.log("pagination")
-    options.limit = 10,
-    options.offset = (request.query.page - 1) * options.limit
+    console.log('pagination');
+    (options.limit = 10), (options.offset = (request.query.page - 1) * options.limit);
   }
 
   // Search the results by title, author or genre
@@ -92,13 +91,13 @@ router.get('/', (request, response) => {
 // Create a book
 router.post('/', (request, response, next) => {
   Books.create(request.body)
-    .then(books => {
+    .then(book => {
       response.redirect('/books/');
     })
     .catch(err => {
       if (err.name === 'SequelizeValidationError') {
         response.render('books/new', {
-          books: Books.build(request.body),
+          book: Books.build(request.body),
           title: 'New book',
           errors: err.errors
         });
@@ -113,7 +112,7 @@ router.post('/', (request, response, next) => {
 
 // Create book form
 router.get('/new', (request, response, next) => {
-  response.render('books/new', { books: Books.build(), title: 'New book' });
+  response.render('books/new', { book: Books.build(), title: 'New book' });
 });
 
 // Edit book form
@@ -121,7 +120,7 @@ router.get('/:id/edit', (request, response, next) => {
   Books.findById(request.params.id)
     .then(book => {
       if (book) {
-        response.render('books/edit', { books: book, title: 'Edit Book Information' });
+        response.render('books/edit', { book, title: 'Edit Book Information' });
       } else {
         response.sendStatus(404);
       }
@@ -162,35 +161,28 @@ router.get('/:id', async (request, response) => {
 });
 
 // Edit/update book
-router.put('/:id', (request, response, next) => {
-  Books.findById(request.params.id)
-    .then(books => {
-      if (books) {
-        return books.update(request.body);
-      } else {
-        response.send(404);
-      }
-    })
-    .then(books => {
-      response.redirect('/books/' + books.id);
-    })
-    .catch(err => {
+router.put('/:id', async (request, response) => {
+  const book = await Books.findById(request.params.id);
+  if (book) {
+    try {
+      await book.update(request.body);
+    } catch (err) {
+      console.log(err)
       if (err.name === 'SequelizeValidationError') {
-        const book = Book.build(request.body);
-        books.id = request.params.id;
-
-        response.render('books/edit', {
-          books: books,
+        return response.render('books/edit', {
+          book,
           title: 'Edit Book',
-          errors: err.errors
+          errors: err.errors,
+          d
         });
       } else {
-        throw err;
+        return response.sendStatus(500);
       }
-    })
-    .catch(err => {
-      response.sendStatus(500);
-    });
+    }
+    return response.redirect('/books/' + book.id);
+  } else {
+    return response.send(404);
+  }
 });
 
 // Delete individual book
