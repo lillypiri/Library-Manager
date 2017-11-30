@@ -3,6 +3,7 @@
 ## Library Manager 📚
 
 ###### This is the tenth of twelve projects for the 🏡 Treehouse Techdegree Full Stack JavaScript.
+Currently a WIP. 
 
 A library management system / dynamic website using Express, Pug, and the SQL ORM Sequelize.
 
