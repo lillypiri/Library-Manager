@@ -14,7 +14,7 @@ const { Sequelize, Books, Loans, Patrons } = require('../models');
 router.get('/', (request, response) => {
   let options = {
     order: [['title', 'asc']],
-    limit: 34,
+    limit: 10,
     offset: 0,
     where: {}
   };
