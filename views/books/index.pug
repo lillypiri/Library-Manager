@@ -33,3 +33,7 @@ block main
 						td= book.author
 						td= book.genre
 						td= book.first_published
+		p= "Books in System: " + bookCount
+		p= "Pages: "
+		- for (var x = 1; x <= pages; x++)
+			a(href="/books/?page=" + x)= x + "  "

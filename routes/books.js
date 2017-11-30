@@ -14,7 +14,7 @@ const { Sequelize, Books, Loans, Patrons } = require('../models');
 router.get('/', (request, response) => {
   let options = {
     order: [['title', 'asc']],
-    limit: 10,
+    limit: 34,
     offset: 0,
     where: {}
   };
@@ -47,6 +47,10 @@ router.get('/', (request, response) => {
         }
       }
     ];
+  } else if (request.query.page) {
+    console.log("pagination")
+    options.limit = 10,
+    options.offset = (request.query.page - 1) * options.limit
   }
 
   // Search the results by title, author or genre
@@ -72,27 +76,17 @@ router.get('/', (request, response) => {
     };
   }
 
-  Books.findAll(options)
+  Books.findAndCountAll(options)
     .then(books => {
-      response.render('books/index', { books, title: 'All Books' });
+      let bookCount = books.count;
+      let pageSize = 10;
+      let pages = Math.ceil(bookCount / pageSize);
+      response.render('books/index', { books: books.rows, bookCount, pageSize, pages: pages, title: 'All Books' });
     })
     .catch(err => {
-      console.log(err);
+      console.log('findAndCountAll error', err);
       response.sendStatus(500);
     });
-
-    Books.findAndCountAll(options)
-      .then(books => {
-        let bookCount = books.count;
-        let pageSize = 10;
-        let pages = Math.ceil(bookCount / pageSize);
-        console.log('Book count:', bookCount, "Page count:", pages);
-        // console.log('rows of stuff', result.rows);
-      })
-      .catch(err => {
-        console.log("Find and count all error", err);
-        response.sendStatus(500);
-      });
 });
 
 // Create a book
