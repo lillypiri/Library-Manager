@@ -4,7 +4,7 @@ const format = require('date-fns/format');
 
 function d(date) {
   if (!date) return '';
-  
+
   return format(date, 'YYYY-MM-DD');
 }
 
@@ -12,13 +12,12 @@ const { Sequelize, Books, Loans, Patrons } = require('../models');
 
 // Index - list all books
 router.get('/', (request, response) => {
-  let options = { 
+  let options = {
     order: [['title', 'asc']],
     where: {}
   };
-
-  // //define a where object -
   // console.log(request.query);
+  // filters for overdue and checked out
   if (request.query.filter === 'overdue') {
     options.include = [
       {
@@ -32,7 +31,7 @@ router.get('/', (request, response) => {
       }
     ];
   } else if (request.query.filter === 'checked_out') {
-    console.log("IS THIS THING ON")
+    console.log('IS THIS THING ON');
     options.include = [
       {
         model: Loans,
@@ -42,37 +41,34 @@ router.get('/', (request, response) => {
           },
           returned_on: {
             [Sequelize.Op.eq]: null
-        }
+          }
         }
       }
     ];
   }
-  
-  //input name = q, form method is a get.
+
   // Search the results by title, author or genre
   if (request.query.q) {
     options.where = {
       [Sequelize.Op.or]: [
-        { 
+        {
           title: {
             [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
           }
         },
-        { 
+        {
           author: {
             [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
           }
         },
-        { 
+        {
           genre: {
             [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
           }
         }
       ]
-    }
+    };
   }
-
-
 
   Books.findAll(options)
     .then(books => {
@@ -84,14 +80,13 @@ router.get('/', (request, response) => {
     });
 });
 
-// create book
-
-router.post('/', function(request, response, next) {
+// Create a book
+router.post('/', (request, response, next) => {
   Books.create(request.body)
-    .then(function(books) {
+    .then(books => {
       response.redirect('/books/');
     })
-    .catch(function(err) {
+    .catch(err => {
       if (err.name === 'SequelizeValidationError') {
         response.render('books/new', {
           books: Books.build(request.body),
@@ -102,76 +97,75 @@ router.post('/', function(request, response, next) {
         throw err;
       }
     })
-    .catch(function(err) {
+    .catch(err => {
       response.sendStatus(500);
     });
 });
 
-// book form
-router.get('/new', function(request, response, next) {
+// Create book form
+router.get('/new', (request, response, next) => {
   response.render('books/new', { books: Books.build(), title: 'New book' });
 });
 
-// edit book form
-router.get('/:id/edit', function(request, response, next) {
+// Edit book form
+router.get('/:id/edit', (request, response, next) => {
   Books.findById(request.params.id)
-    .then(function(book) {
+    .then(book => {
       if (book) {
         response.render('books/edit', { books: book, title: 'Edit Book Information' });
       } else {
         response.sendStatus(404);
       }
     })
-    .catch(function(err) {
+    .catch(err => {
       response.sendStatus(500);
     });
 });
 
-// delete book form
-router.get('/:id/delete', function(request, response, next) {
+// Delete book form
+router.get('/:id/delete', (request, response, next) => {
   Books.findById(request.params.id)
-    .then(function(book) {
+    .then(book => {
       if (book) {
-        // console.log('book', book);
         response.render('books/delete', { book: book, title: 'Delete Book' });
       } else {
         response.sendStatus(404);
       }
     })
-    .catch(function(err) {
+    .catch(err => {
       console.log('THING', err);
       response.sendStatus(500);
     });
 });
 
-//get an individual book
+// Get an individual book
 router.get('/:id', async (request, response) => {
   const [book, loans] = await Promise.all([
     Books.findById(request.params.id),
-    Loans.findAll({ where: { book_id: request.params.id }, include: [{ model: Patrons }]})
+    Loans.findAll({ where: { book_id: request.params.id }, include: [{ model: Patrons }] })
   ]);
-  
+
   if (!book) {
     return response.sendStatus(404);
   }
-  
+
   return response.render('books/show', { title: book.title, book, loans, d });
 });
 
-// update book
-router.put('/:id', function(request, response, next) {
+// Edit/update book
+router.put('/:id', (request, response, next) => {
   Books.findById(request.params.id)
-    .then(function(books) {
+    .then(books => {
       if (books) {
         return books.update(request.body);
       } else {
         response.send(404);
       }
     })
-    .then(function(books) {
+    .then(books => {
       response.redirect('/books/' + books.id);
     })
-    .catch(function(err) {
+    .catch(err => {
       if (err.name === 'SequelizeValidationError') {
         const book = Book.build(request.body);
         books.id = request.params.id;
@@ -185,7 +179,7 @@ router.put('/:id', function(request, response, next) {
         throw err;
       }
     })
-    .catch(function(err) {
+    .catch(err => {
       response.sendStatus(500);
     });
 });
@@ -210,11 +204,11 @@ router.put('/:id', function(request, response, next) {
 //     });
 // });
 
-//delete individual book
-router.delete('/:id', function(request, response, next) {
+// Delete individual book
+router.delete('/:id', (request, response, next) => {
   console.log('IN DELETE');
   Books.findById(request.params.id)
-    .then(function(book) {
+    .then(book => {
       if (book) {
         console.log('in book');
         return book.destroy();
@@ -223,10 +217,10 @@ router.delete('/:id', function(request, response, next) {
         console.log('SENDING A 404!!!!!!!!!!!!!!!!!!!!!!!!!!!!', book);
       }
     })
-    .then(function() {
+    .then(() => {
       response.redirect('/books');
     })
-    .catch(function(err) {
+    .catch(err => {
       console.log('book', book);
       console.log('THING', err);
       response.sendStatus(500);
