@@ -12,9 +12,53 @@ const { Patrons, Sequelize, Books, Loans } = require('../models');
 
 // Index - list all patrons
 router.get('/', (request, response) => {
-  Patrons.findAll({ order: [['last_name', 'asc']] })
+  let options = {
+    order: [['last_name', 'asc']],
+    limit: 10,
+    offset: 0,
+    where: {}
+  };
+
+  if (request.query.page) {
+    console.log('pagination');
+    options.limit = 10;
+    options.offset = (request.query.page - 1) * options.limit;
+  }
+
+  if (request.query.q) {
+    options.where = {
+      [Sequelize.Op.or]: [
+        {
+          first_name: {
+            [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
+          }
+        },
+        {
+          last_name: {
+            [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
+          }
+        },
+        {
+          library_id: {
+            [Sequelize.Op.like]: `%${request.query.q.toLowerCase()}%`
+          }
+        }
+      ]
+    };
+  }
+
+  Patrons.findAndCountAll(options)
     .then(patrons => {
-      response.render('patrons/index', { patrons });
+      let patronCount = patrons.count;
+      let pageSize = 10;
+      let pages = Math.ceil(patronCount / pageSize);
+      response.render('patrons/index', {
+        patrons: patrons.rows,
+        patronCount,
+        pageSize,
+        pages: pages,
+        title: 'All Patrons'
+      });
     })
     .catch(err => {
       console.log(err);
@@ -25,13 +69,13 @@ router.get('/', (request, response) => {
 // Create patron
 router.post('/', (request, response, next) => {
   Patrons.create(request.body)
-    .then(patrons => {
+    .then(patron => {
       response.redirect('/patrons/');
     })
     .catch(err => {
       if (err.name === 'SequelizeValidationError') {
         response.render('patrons/new', {
-          patrons: Patrons.build(request.body),
+          patron: Patrons.build(request.body),
           title: 'New patron',
           errors: err.errors
         });
@@ -47,7 +91,11 @@ router.post('/', (request, response, next) => {
 
 // Patron form
 router.get('/new', (request, response, next) => {
-  response.render('patrons/new', { patrons: Patrons.build(), title: 'New patron' });
+  try {
+    response.render('patrons/new', { patron: Patrons.build(), title: 'New patron' });
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 // Edit patron form
@@ -96,35 +144,30 @@ router.get('/:id', async (request, response) => {
 });
 
 // Edit/update patron
-router.put('/:id', (request, response, next) => {
-  Patrons.findById(request.params.id)
-    .then(patrons => {
-      if (patrons) {
-        return patrons.update(request.body);
-      } else {
-        response.send(404);
-      }
-    })
-    .then(patrons => {
-      response.redirect('/patrons/' + patrons.id);
-    })
-    .catch(err => {
+router.put('/:id', async (request, response, next) => {
+  const patron = await Patrons.findById(request.params.id);
+  if (patron) {
+    try {
+      await patron.update(request.body);
+    } catch (err) {
+      console.log(err);
       if (err.name === 'SequelizeValidationError') {
-        const patron = Patron.build(request.body);
-        patrons.id = request.params.id;
-
-        response.render('patrons/edit', {
-          patrons: patrons,
+        const loans = await Loans.findAll({ where: { patron_id: patron.id }, include: [{ model: Books }] });
+        return response.render('patrons/show', {
+          patron,
+          loans,
           title: 'Edit Patron',
-          errors: err.errors
+          errors: err.errors,
+          d
         });
       } else {
-        throw err;
+        return response.sendStatus(500);
       }
-    })
-    .catch(err => {
-      response.sendStatus(500);
-    });
+    }
+    return response.redirect('/patrons/');
+  } else {
+    return response.send(404);
+  }
 });
 
 // Delete individual patron

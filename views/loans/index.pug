@@ -15,13 +15,12 @@ block main
 		table
 			thead
 				tr
-					th Book
+					th Book Title
 					th Patron 
 					th Loaned on
 					th Return by 
 					th Returned on
 					th Action
-					th Delete
 			tbody
 				each loan in loans
 					tr
@@ -35,5 +34,7 @@ block main
 						td
 							if !loan.returned_on
 								a.button(href="/loans/" + loan.id + "/return") Return Book
-						td
-							a.button(href="/loans/" + loan.id +  "/delete") Delete Loan 
+		p= "Loans in System: " + loanCount
+		p= "Pages: "
+		- for (var x = 1; x <= pages; x++)
+			a(href="/loans/?page=" + x)= x + "  "

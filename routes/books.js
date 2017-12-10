@@ -179,7 +179,7 @@ router.put('/:id', async (request, response) => {
         return response.sendStatus(500);
       }
     }
-    return response.redirect('/books/' + book.id);
+    return response.redirect('/books');
   } else {
     return response.send(404);
   }

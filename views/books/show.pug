@@ -1,14 +1,11 @@
 extends ../layout
 
 block main
-	h1= book.title
-	p= book.author
-	p= book.first_published
-	p= book.genre
-	p= book.id
+	include ../error
+		
+	form(action="/books/" + book.id + "?_method=PUT", method="post")
+		include form
 	a(href="../books") &larr; Back
-	| | 
-	a(href="/books/" + book.id + "/edit") Edit Book
 	| | 
 	a(href="/books/" + book.id +  "/delete") Delete Book
 	h2 Loan History
@@ -25,11 +22,12 @@ block main
 			each loan in loans
 				tr
 					td
-						a(href='book_detail.html')= book.title
+						a(href='/books/' + book.id)= book.title
 					td
-						a(href='patron_detail.html')= loan.Patron.first_name + ' ' + loan.Patron.last_name
+						a(href='/patrons/' + loan.Patron.id)= loan.Patron.first_name + " " + loan.Patron.last_name
 					td= d(loan.loaned_on)
 					td= d(loan.return_by)
 					td= d(loan.returned_on)
 					td
-						a.button(href="/loans/" + loan.id + "/return") Return Book
+						if !loan.returned_on
+							a.button(href="/loans/" + loan.id + "/return") Return Book

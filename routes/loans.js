@@ -15,6 +15,8 @@ router.get('/', (request, response) => {
   let options = {
     order: [['return_by', 'desc']],
     include: [{ model: Books }, { model: Patrons }],
+    limit: 10,
+    offset: 0,
     where: {}
   };
 
@@ -36,11 +38,18 @@ router.get('/', (request, response) => {
         [Sequelize.Op.eq]: null
       }
     };
+  } else if (request.query.page) {
+    console.log('pagination');
+    options.limit = 10;
+    options.offset = (request.query.page - 1) * options.limit;
   }
 
-  Loans.findAll(options)
+  Loans.findAndCountAll(options)
     .then(loans => {
-      response.render('loans/index', { loans, d });
+      let loanCount = loans.count;
+      let pageSize = 10;
+      let pages = Math.ceil(loanCount / pageSize);
+      response.render('loans/index', { loans: loans.rows, loanCount, pageSize, pages: pages, d });
     })
     .catch(err => {
       console.log('find all loans error', err);
@@ -51,16 +60,19 @@ router.get('/', (request, response) => {
 // Create a loan
 router.post('/', (request, response, next) => {
   Loans.create(request.body)
-    .then(loans => {
+    .then(loan => {
       response.redirect('/loans/');
     })
-    .catch(err => {
-      console.log('createa loan error', err);
+    .catch(async err => {
+      console.log('create a loan error', err);
       if (err.name === 'SequelizeValidationError') {
         response.render('loans/new', {
-          loans: Loans.build(request.body),
+          loan: Loans.build(request.body),
           title: 'New Loan',
-          errors: err.errors
+          errors: err.errors,
+          books: await Books.findAll(),
+          patrons: await Patrons.findAll(),
+          d
         });
       } else {
         response.sendStatus(500);
@@ -71,27 +83,7 @@ router.post('/', (request, response, next) => {
 // New loan form
 router.get('/new', (request, response) => {
   // Get a list of all books that are not already on loan
-  Books.findAll({
-    include: [
-      {
-        model: Loans,
-        where: {
-          [Sequelize.Op.or]: [
-            {
-              loaned_on: {
-                [Sequelize.Op.eq]: null
-              }
-            },
-            {
-              returned_on: {
-                [Sequelize.Op.ne]: null
-              }
-            }
-          ]
-        }
-      }
-    ]
-  })
+  Books.findAll()
     .then(books => {
       // Get a list of all patrons
       Patrons.findAll()
@@ -126,9 +118,9 @@ router.get('/:id', (request, response, next) => {
 // Return loan form
 router.get('/:id/return', async (request, response) => {
   const loan = await Loans.findById(request.params.id);
-
+  const [book, patron] = await Promise.all([Books.findById(loan.book_id), Patrons.findById(loan.patron_id)]);
   if (loan) {
-    response.render('loans/return', { loan, title: 'Return a loan', d });
+    response.render('loans/return', { loan, patron, book, title: 'Return a loan', d });
   } else {
     response.sendStatus(404);
   }
@@ -147,6 +139,8 @@ router.put('/:id', async (request, response) => {
         return response.render('loans/return', {
           title: 'Return a book',
           loan,
+          book: await Books.findById(loan.book_id),
+          patron: await Patrons.findById(loan.patron_id),
           errors: err.errors,
           d
         });

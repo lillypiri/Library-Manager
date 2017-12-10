@@ -1,19 +1,19 @@
 div
 	label(for="first_name") First name:
-	input(type="text", name="first_name" value=patrons.first_name)
+	input(type="text", name="first_name" value=patron.first_name)
 div
 	label(for="last_name") Last Name:
-	input(type="text", name="last_name" value=patrons.last_name)
+	input(type="text", name="last_name" value=patron.last_name)
 div
 	label(for="address") Address:
-	input(type="text", name="address" value=patrons.address)
+	input(type="text", name="address" value=patron.address)
 div
 	label(for="zip_code") Zip Code:
-	input(type="integer", name="zip_code" value=patrons.zip_code)
+	input(type="integer", name="zip_code" value=patron.zip_code)
 div
 	label(for="email") Email:
-	input(type="text", name="email" value=patrons.email)
+	input(type="text", name="email" value=patron.email)
 div
 	label(for="library_id") Library ID:
-	input(type="text", name="library_id" value=patrons.library_id)
-input(type="submit")
+	input(type="text", name="library_id" value=patron.library_id)
+input(type="submit" value="Update")

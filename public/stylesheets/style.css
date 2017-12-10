@@ -67,6 +67,7 @@ tr .button {
   background-color: #4b6a88;
   padding: 4px 8px 5px;
   font-weight: normal;
+  white-space: nowrap;
 }
   tr .button:hover {
     background-color: #547798;
