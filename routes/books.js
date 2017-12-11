@@ -169,10 +169,11 @@ router.put('/:id', async (request, response) => {
     } catch (err) {
       console.log(err)
       if (err.name === 'SequelizeValidationError') {
-        return response.render('books/edit', {
+        return response.render('books/show', {
           book,
           title: 'Edit Book',
           errors: err.errors,
+          loans: await Loans.findAll({ where: { book_id: request.params.id }, include: [{ model: Patrons }] }),
           d
         });
       } else {
